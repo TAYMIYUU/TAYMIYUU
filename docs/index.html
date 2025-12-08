@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TAYMIYUU</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-accent: #ff9a9e;
+      --secondary-accent: #fad0c4;
+      --glass-bg: rgba(255, 255, 255, 0.6);
+      --text-color: #555555;
+    }
+
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      color: var(--text-color);
+      background-color: #fff2f2;
+    }
+
+    body {
+      background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a1c4fd);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px;
+      /* 3D Perspective */
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    #sakura-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .sakura {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 100% 0 100% 0;
+      opacity: 0.8;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        opacity: 0;
+        transform: translate(0, -10vh) rotateZ(0deg);
+      }
+
+      20% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(10vw, 110vh) rotateZ(360deg);
+      }
+    }
+
+    .typing-header {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      min-height: 2.5rem;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .typing-cursor::after {
+      content: '|';
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: none;
+      box-shadow: 0 20px 50px rgba(255, 154, 158, 0.25);
+      border-radius: 30px;
+    }
+
+    .container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      z-index: 10;
+      transition: transform 0.1s ease-out;
+      transform-style: preserve-3d;
+      background: rgba(255, 255, 255, 0.45);
+      /* Default transform for mobile baseline */
+      transform: rotateX(0deg) rotateY(0deg);
+    }
+
+    .anime-button {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: 40px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 20px 40px rgba(255, 154, 158, 0.3);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: translateZ(20px);
+    }
+
+    .anime-button:hover {
+      transform: scale(1.05) rotate(2deg) translateZ(30px);
+    }
+
+    .anime-button img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.5s ease;
+    }
+
+    .anime-button img.asuna {
+      opacity: 1;
+      z-index: 1;
+    }
+
+    .anime-button img.kirito {
+      opacity: 0;
+      z-index: 2;
+    }
+
+    .anime-button:hover img.asuna {
+      opacity: 0;
+    }
+
+    .anime-button:hover img.kirito {
+      opacity: 1;
+    }
+
+    .link-button {
+      position: relative;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.4);
+      padding: 16px 40px;
+      border-radius: 50px;
+      border: none;
+      box-shadow: 0 10px 25px rgba(255, 154, 158, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      z-index: 1;
+      letter-spacing: 0.5px;
+      transform: translateZ(10px);
+    }
+
+    .link-button span {
+      position: relative;
+      z-index: 2;
+      color: #555;
+      transition: color 0.3s ease;
+    }
+
+    .link-button::before {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background-color: #ff9a9e;
+      border-radius: 40%;
+      top: 150%;
+      left: 50%;
+      transform: translateX(-50%) rotate(0deg);
+      transition: top 0.6s ease;
+      z-index: 0;
+    }
+
+    .link-button:hover {
+      transform: translateY(-5px) translateZ(15px);
+      box-shadow: 0 15px 35px rgba(255, 154, 158, 0.5);
+    }
+
+    .link-button:hover span {
+      color: white;
+    }
+
+    .link-button:hover::before {
+      top: -80px;
+      animation: waveSpin 4s linear infinite;
+    }
+
+    @keyframes waveSpin {
+      0% {
+        transform: translateX(-50%) rotate(0deg);
+      }
+
+      100% {
+        transform: translateX(-50%) rotate(360deg);
+      }
+    }
+
+    .menu-icon {
+      position: fixed;
+      top: 30px;
+      left: 30px;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 200;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .menu-icon:hover {
+      background: #fff;
+      transform: scale(1.1);
+      box-shadow: 0 8px 20px rgba(255, 154, 158, 0.2);
+    }
+
+    .menu-icon div {
+      width: 22px;
+      height: 3px;
+      background-color: #ff9a9e;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .menu-icon.open div:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 6px);
+    }
+
+    .menu-icon.open div:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-icon.open div:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -6px);
+    }
+
+    .tab-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 300px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(25px);
+      transform: translateX(-100%);
+      transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding-top: 120px;
+      box-shadow: 10px 0 40px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-menu.open {
+      transform: translateX(0);
+    }
+
+    .tab-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .tab-menu ul li a {
+      display: block;
+      padding: 24px 50px;
+      text-decoration: none;
+      color: #888;
+      font-size: 1.3rem;
+      font-weight: 400;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-menu ul li a:hover {
+      background: linear-gradient(90deg, #fff2f2, transparent);
+      color: #ff9a9e;
+      border-left: 4px solid #ff9a9e;
+      padding-left: 60px;
+    }
+
+    .audio-wrapper {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      display: flex;
+      align-items: center;
+      z-index: 150;
+      gap: 15px;
+    }
+
+    .width-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 15px;
+      border-radius: 50px;
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateX(20px);
+      pointer-events: none;
+      visibility: hidden;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .width-control.visible {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .audio-button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #888;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .audio-button:hover {
+      background: #fff2f2;
+      color: #ff9a9e;
+    }
+
+    .volume-display {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #555;
+      min-width: 45px;
+      text-align: center;
+    }
+
+    .song-selector {
+      border: none;
+      background: #f8f8f8;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      color: #555;
+      cursor: pointer;
+      outline: none;
+      max-width: 160px;
+    }
+
+    #flower-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 3px solid #fff;
+      box-shadow: 0 5px 15px rgba(255, 154, 158, 0.3);
+    }
+
+    #flower-img:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 20px rgba(255, 154, 158, 0.5);
+    }
+
+    .rotating {
+      animation: spin 8s linear infinite;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px;
+        width: 85%;
+      }
+
+      .anime-button {
+        width: 220px;
+        height: 220px;
+      }
+
+      .typing-header {
+        font-size: 1.5rem;
+      }
+
+      .width-control {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 80%;
+        max-width: 300px;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 20px 60px rgba(255, 154, 158, 0.3);
+        transform: translate(-50%, -50%) scale(0.9);
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+        border-radius: 30px;
+      }
+
+      .width-control.visible {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      .audio-button {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        background: #fffbfb;
+      }
+
+      .song-selector {
+        width: 100%;
+        text-align: center;
+        max-width: none;
+        padding: 12px;
+        background: #f0f0f0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sakura Background -->
+  <div id="sakura-container"></div>
+
+  <!-- Menu Icon -->
+  <div class="menu-icon" id="menu-icon">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <!-- Tab Menu -->
+  <nav class="tab-menu" id="tab-menu">
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About Me</a></li>
+      <li><a href="#services">Games</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Audio Player -->
+  <div class="audio-wrapper">
+    <div class="glass width-control" id="audio-panel">
+      <!-- Playback Controls -->
+      <div style="display:flex; align-items:center; gap: 15px; width: 100%; justify-content: center;">
+        <button class="audio-button" id="volume-down-btn" title="Vol -">−</button>
+        <button class="audio-button" id="play-pause-btn" title="Play/Pause">▶</button>
+        <button class="audio-button" id="volume-up-btn" title="Vol +">＋</button>
+      </div>
+
+      <div class="volume-display" id="volume-display">20%</div>
+
+      <select id="song-selector" class="song-selector" title="Select Song">
+        <option value="music/flower.mp3" data-img="music/flower1.png">Flower</option>
+        <option value="music/Oroka%20na%20Tenshi.mp3" data-img="music/Oroka%20na%20Tenshi1.png">Oroka na Tenshi</option>
+        <option value="music/=LOVE.mp3" data-img="music/=LOVE1.png">=LOVE</option>
+        <option value="music/Fire%20Force%20Opening.mp3" data-img="music/Fire%20Force%20Opening%201.png">Fire Force
+        </option>
+        <option value="music/jujutsu%20opening%202.mp3" data-img="music/jujutsu%20opening%2021.png">Jujutsu Kaisen
+        </option>
+        <option value="music/centimer.mp3" data-img="music/centimer1.png">Centimer</option>
+        <option value="music/Lilac.mp3" data-img="music/Lilac1.png">Lilac</option>
+        <option value="music/Harukaze.mp3" data-img="music/Harukaze.png">春風 - Rihwa</option>
+      </select>
+    </div>
+
+    <img src="music/flower1.png" id="flower-img" alt="Music" title="Show Music Player">
+  </div>
+
+  <!-- Main Content (3D Container) -->
+  <main class="container glass" id="card-3d">
+    <h1 class="typing-header typing-cursor" id="typing-text"></h1>
+    <button class="anime-button" id="anime-button">
+      <img src="static/images/asuna.png" alt="Asuna" class="asuna" />
+      <img src="static/images/kirito.png" alt="Kirito" class="kirito" />
+    </button>
+    <a href="https://www.instagram.com/tay.miyuu__/" class="link-button" target="_blank">
+      <span>IG : TAYMIYUU__</span>
+    </a>
+  </main>
+
+  <audio id="audio-player" src="music/flower.mp3" preload="auto"></audio>
+
+  <script>
+    const menuIcon = document.getElementById('menu-icon');
+    const tabMenu = document.getElementById('tab-menu');
+    const audio = document.getElementById('audio-player');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const volumeDownBtn = document.getElementById('volume-down-btn');
+    const volumeUpBtn = document.getElementById('volume-up-btn');
+    const volumeDisplay = document.getElementById('volume-display');
+    const flowerImg = document.getElementById('flower-img');
+    const songSelector = document.getElementById('song-selector');
+    const audioPanel = document.getElementById('audio-panel');
+    const typingText = document.getElementById('typing-text');
+    const card3d = document.getElementById('card-3d');
+
+    // --- Typing Effect ---
+    const texts = ["Welcome to TAYMIYUU", "Music & Me", "Let's be Friends!"];
+    let textIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+
+    function typeEffect() {
+      const currentText = texts[textIndex];
+      if (isDeleting) {
+        typingText.textContent = currentText.substring(0, charIndex - 1);
+        charIndex--;
+      } else {
+        typingText.textContent = currentText.substring(0, charIndex + 1);
+        charIndex++;
+      }
+      let speed = isDeleting ? 100 : 200;
+      if (!isDeleting && charIndex === currentText.length) {
+        speed = 2000;
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        textIndex = (textIndex + 1) % texts.length;
+        speed = 500;
+      }
+      setTimeout(typeEffect, speed);
+    }
+    document.addEventListener('DOMContentLoaded', typeEffect);
+
+    // --- Desktop Mouse Tilt ---
+    function handleMouseTilt(e) {
+      const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+      const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+      card3d.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+    }
+
+    if (window.matchMedia("(hover: hover)").matches) {
+      document.addEventListener('mousemove', handleMouseTilt);
+      document.addEventListener('mouseleave', () => {
+        card3d.style.transform = `rotateY(0deg) rotateX(0deg)`;
+      });
+    }
+
+    // --- Mobile Gyroscope Tilt ---
+    function handleOrientation(event) {
+      // Gamma: Left/Right tilt (-90 to 90)
+      // Beta: Front/Back tilt (-180 to 180)
+      const x = event.gamma;
+      const y = event.beta - 45; // Offset for natural holding position (45deg)
+
+      if (x === null || y === null) return;
+
+      // Clamp values to prevent flipping
+      const clampedX = Math.max(-20, Math.min(20, x));
+      const clampedY = Math.max(-20, Math.min(20, y));
+
+      // Apply tilt
+      requestAnimationFrame(() => {
+        card3d.style.transform = `rotateY(${clampedX}deg) rotateX(${-clampedY}deg)`;
+      });
+    }
+
+    // Request Permission for iOS 13+ on first interaction
+    function requestMotionPermission() {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+            }
+          })
+          .catch(console.error);
+      } else {
+        // Non-iOS or older devices
+        window.addEventListener('deviceorientation', handleOrientation, true);
+      }
+      // Remove listener after first check to avoid spam
+      document.body.removeEventListener('click', requestMotionPermission);
+    }
+
+    // Attach permission request to body click (first interaction)
+    document.body.addEventListener('click', requestMotionPermission);
+
+
+    // --- Sakura Effect ---
+    function createSakura() {
+      const sakura = document.createElement('div');
+      sakura.classList.add('sakura');
+      sakura.style.left = Math.random() * 100 + 'vw';
+      sakura.style.animationDuration = Math.random() * 3 + 4 + 's';
+      sakura.style.width = Math.random() * 10 + 10 + 'px';
+      sakura.style.height = sakura.style.width;
+      document.getElementById('sakura-container').appendChild(sakura);
+      setTimeout(() => sakura.remove(), 7000);
+    }
+    setInterval(createSakura, 300);
+
+    // --- Standard Controls ---
+    menuIcon.addEventListener('click', () => {
+      tabMenu.classList.toggle('open');
+      menuIcon.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      // Don't close if clicking menu icon itself
+      if (!tabMenu.contains(e.target) && !menuIcon.contains(e.target) && tabMenu.classList.contains('open')) {
+        tabMenu.classList.remove('open');
+        menuIcon.classList.remove('open');
+      }
+    });
+
+    audio.volume = 0.2;
+    volumeDisplay.textContent = `${Math.round(audio.volume * 100)}%`;
+
+    flowerImg.addEventListener('click', (e) => {
+      e.stopPropagation();
+      audioPanel.classList.toggle('visible');
+    });
+
+    document.addEventListener('click', (e) => {
+      const isClickInside = audioPanel.contains(e.target) || flowerImg.contains(e.target);
+      if (!isClickInside && audioPanel.classList.contains('visible')) {
+        audioPanel.classList.remove('visible');
+      }
+    });
+
+    playPauseBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {
+            playPauseBtn.textContent = '⏸';
+            flowerImg.classList.add('rotating');
+          }).catch(console.error);
+        }
+      } else {
+        audio.pause();
+        playPauseBtn.textContent = '▶';
+        flowerImg.classList.remove('rotating');
+      }
+    });
+
+    volumeDownBtn.addEventListener('click', () => {
+      if (audio.volume > 0) {
+        audio.volume = Math.max(0, audio.volume - 0.1);
+        volumeDisplay.textContent = `${Math.round(audio.volume * 100)}%`;
+      }
+    });
+
+    volumeUpBtn.addEventListener('click', () => {
+      if (audio.volume < 1) {
+        audio.volume = Math.min(1, audio.volume + 0.1);
+        volumeDisplay.textContent = `${Math.round(audio.volume * 100)}%`;
+      }
+    });
+
+    songSelector.addEventListener('change', () => {
+      const selectedOption = songSelector.options[songSelector.selectedIndex];
+      audio.src = selectedOption.value;
+      const newImg = selectedOption.getAttribute('data-img');
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(_ => {
+          playPauseBtn.textContent = '⏸';
+          flowerImg.classList.add('rotating');
+        }).catch(console.error);
+      }
+      if (newImg) flowerImg.src = newImg;
+    });
+  </script>
+</body>
+
+</html>
