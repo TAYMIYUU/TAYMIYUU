@@ -13,10 +13,15 @@
 
   <style>
     :root {
-      --primary-accent: #ff9a9e;
-      --secondary-accent: #fad0c4;
-      --glass-bg: rgba(255, 255, 255, 0.6);
-      --text-color: #555555;
+      --primary-accent: #ff6b81;
+      /* Deeper, richer pink */
+      --secondary-accent: #ff9a9e;
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      /* More opaque for "frame" feel */
+      --text-color: #4a4a4a;
+      /* Softer dark gray */
+      --shadow-soft: 0 10px 40px rgba(255, 107, 129, 0.15);
+      --shadow-deep: 0 20px 60px rgba(255, 107, 129, 0.3);
     }
 
     body,
@@ -36,10 +41,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      perspective: 1000px;
-      /* 3D Perspective */
+      perspective: 1200px;
+      /* Enhanced depth */
     }
 
+    /* ... keyframes ... */
     @keyframes gradientBG {
       0% {
         background-position: 0% 50%;
@@ -54,6 +60,7 @@
       }
     }
 
+    /* ... sakura ... */
     #sakura-container {
       position: fixed;
       top: 0;
@@ -67,7 +74,7 @@
 
     .sakura {
       position: absolute;
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.9);
       border-radius: 100% 0 100% 0;
       opacity: 0.8;
       animation: fall linear infinite;
@@ -89,35 +96,32 @@
       }
     }
 
+    /* TYPOGRAPHY */
     .typing-header {
-      font-size: 2rem;
+      font-size: 2.5rem;
+      /* Larger */
       font-weight: 700;
+      letter-spacing: 2px;
+      /* Elegant spacing */
       color: #fff;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 30px;
-      min-height: 2.5rem;
+      text-shadow: 0 4px 15px rgba(255, 107, 129, 0.4);
+      margin-bottom: 40px;
+      min-height: 3rem;
       text-align: center;
       z-index: 10;
     }
 
-    .typing-cursor::after {
-      content: '|';
-      animation: blink 1s step-start infinite;
-    }
-
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-
+    /* GLASS FRAME */
     .glass {
       background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: none;
-      box-shadow: 0 20px 50px rgba(255, 154, 158, 0.25);
-      border-radius: 30px;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      /* "Frame" border */
+      box-shadow: var(--shadow-deep),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+      /* Inner light */
+      border-radius: 40px;
     }
 
     .container {
@@ -126,28 +130,38 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px;
+      padding: 70px;
       z-index: 10;
       transition: transform 0.1s ease-out;
       transform-style: preserve-3d;
-      background: rgba(255, 255, 255, 0.45);
-      /* Default transform for mobile baseline */
+      background: rgba(255, 255, 255, 0.5);
       transform: rotateX(0deg) rotateY(0deg);
     }
 
+    /* ANIME BUTTON (Interactive) */
     .anime-button {
       position: relative;
-      width: 280px;
-      height: 280px;
+      width: 300px;
+      height: 300px;
       border: none;
-      background: none;
+      background: transparent;
       cursor: pointer;
-      border-radius: 40px;
-      overflow: hidden;
-      margin-bottom: 30px;
-      box-shadow: 0 20px 40px rgba(255, 154, 158, 0.3);
+      border-radius: 50px;
+      overflow: visible;
+      /* Allowing slight pop-out if needed */
+      margin-bottom: 40px;
       transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      transform: translateZ(20px);
+      transform: translateZ(30px);
+      /* Image masking */
+      mask-image: radial-gradient(white, black);
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
+      /* Actually let's use clip-path or overflow hidden on inner */
+    }
+
+    /* Reverting mask, using internal wrapper for masking if needed, but simple helps */
+    .anime-button {
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(255, 107, 129, 0.25);
     }
 
     .anime-button:hover {
@@ -339,77 +353,84 @@
       padding-left: 60px;
     }
 
+    /* AUDIO CAPSULE */
     .audio-wrapper {
       position: fixed;
-      top: 30px;
-      right: 30px;
+      top: 40px;
+      right: 40px;
       display: flex;
       align-items: center;
-      z-index: 150;
       gap: 15px;
+      z-index: 150;
     }
 
     .width-control {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 15px;
+      gap: 12px;
+      padding: 8px 12px 8px 18px;
+      /* Balanced padding */
       border-radius: 50px;
-      transition: all 0.4s ease;
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
       opacity: 0;
-      transform: translateX(20px);
+      transform: translateX(30px) scale(0.95);
       pointer-events: none;
       visibility: hidden;
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(15px);
     }
 
     .width-control.visible {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateX(0) scale(1);
       pointer-events: auto;
       visibility: visible;
     }
 
     .audio-button {
-      background: none;
-      border: none;
-      font-size: 1.2rem;
+      background: #f8f8f8;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      font-size: 1rem;
       cursor: pointer;
-      color: #888;
-      width: 36px;
-      height: 36px;
+      color: #666;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
     }
 
     .audio-button:hover {
-      background: #fff2f2;
-      color: #ff9a9e;
+      background: var(--primary-accent);
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(255, 107, 129, 0.3);
     }
 
     .volume-display {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #555;
-      min-width: 45px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      min-width: 40px;
       text-align: center;
     }
 
     .song-selector {
       border: none;
-      background: #f8f8f8;
-      padding: 8px 12px;
-      border-radius: 12px;
+      background: transparent;
+      padding: 5px 10px;
       font-family: 'Outfit', sans-serif;
       font-size: 0.9rem;
-      color: #555;
+      font-weight: 500;
+      color: #333;
       cursor: pointer;
       outline: none;
-      max-width: 160px;
+      max-width: 140px;
+      text-overflow: ellipsis;
     }
 
     #flower-img {
@@ -508,7 +529,7 @@
     <ul>
       <li><a href="#home">Home</a></li>
       <li><a href="#about">About Me</a></li>
-      <li><a href="#services">Games</a></li>
+      <li><a href="Anime/index.html">Anime</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
@@ -545,11 +566,12 @@
   <!-- Main Content (3D Container) -->
   <main class="container glass" id="card-3d">
     <h1 class="typing-header typing-cursor" id="typing-text"></h1>
-    <button class="anime-button" id="anime-button">
+    <a href="Anime/index.html" class="anime-button" id="anime-button" style="display: block;">
       <img src="static/images/asuna.png" alt="Asuna" class="asuna" />
       <img src="static/images/kirito.png" alt="Kirito" class="kirito" />
-    </button>
-    <a href="https://www.instagram.com/tay.miyuu__/" class="link-button" target="_blank">
+    </a>
+    <a href="https://www.instagram.com/tay.miyuu__/" class="link-button" target="_blank"
+      style="padding: 12px 35px; border-radius: 30px; font-size: 1rem;">
       <span>IG : TAYMIYUU__</span>
     </a>
   </main>
