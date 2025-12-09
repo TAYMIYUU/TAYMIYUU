@@ -17,31 +17,57 @@ const titleEl = document.getElementById('anime-title');
 const yearEl = document.getElementById('anime-year');
 const infoPanel = document.querySelector('.info-panel');
 
-let currentIndex = 0;
+// State for continuous interaction
+const state = {
+    // currentProgress: represents the floating point index of the center of view
+    // 0 = first item centered, 1 = second item centered, etc.
+    currentProgress: 0,
+    targetProgress: 0, // Where we want to snap to
+    isDragging: false,
+    startX: 0,
+    startProgress: 0
+};
+
+// Checkpoints for interpolation: [relative_index, transform_values]
+// diff = cardIndex - currentProgress
+// e.g. if we are at progress 0, card 0 has diff 0.
+const checkpoints = [
+    { diff: -2, x: -280, scale: 0.7, z: -100, rot: 25, opacity: 0.4 },
+    { diff: -1, x: -160, scale: 0.9, z: 0, rot: 15, opacity: 0.7 },
+    { diff: 0, x: 0, scale: 1.2, z: 100, rot: 0, opacity: 1 },
+    { diff: 1, x: 160, scale: 0.9, z: 0, rot: -15, opacity: 0.7 },
+    { diff: 2, x: 280, scale: 0.7, z: -100, rot: -25, opacity: 0.4 }
+];
+
+function init() {
+    // Create cards
+    animeList.forEach((anime, index) => {
+        const card = createCard(anime, index);
+        carousel.appendChild(card);
+        const dot = createDot(index);
+        pagination.appendChild(dot);
+    });
+
+    // Start loop
+    requestAnimationFrame(animateLoop);
+}
 
 function createCard(anime, index) {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.index = index;
 
-    if (anime.image) {
-        const img = document.createElement('img');
-        img.src = anime.image;
-        img.alt = anime.title;
-        img.draggable = false;
-        card.appendChild(img);
-    } else {
-        const placeholder = document.createElement('div');
-        placeholder.className = 'card-placeholder';
-        const text = document.createElement('div');
-        text.className = 'card-placeholder-text';
-        text.textContent = anime.title;
-        placeholder.appendChild(text);
-        card.appendChild(placeholder);
-    }
+    const content = anime.image ?
+        `<img src="${anime.image}" alt="${anime.title}" draggable="false">` :
+        `<div class="card-placeholder"><div class="card-placeholder-text">${anime.title}</div></div>`;
 
-    card.addEventListener('click', () => {
-        updateCarousel(index);
+    card.innerHTML = content;
+
+    // Click to jump if not dragging
+    card.addEventListener('click', (e) => {
+        if (!state.isDragging && Math.abs(state.currentProgress - index) > 0.1) {
+            state.targetProgress = index;
+        }
     });
 
     return card;
@@ -51,141 +77,190 @@ function createDot(index) {
     const dot = document.createElement('div');
     dot.className = 'dot';
     dot.addEventListener('click', () => {
-        updateCarousel(index);
+        state.targetProgress = index;
     });
     return dot;
 }
 
-function init() {
-    // Create cards
-    animeList.forEach((anime, index) => {
-        const card = createCard(anime, index);
-        carousel.appendChild(card);
-
-        const dot = createDot(index);
-        pagination.appendChild(dot);
-    });
-
-    updateCarousel(0);
-}
-
-function updateCarousel(newIndex) {
-    currentIndex = newIndex;
+function updateVisuals(progress) {
     const cards = document.querySelectorAll('.card');
-    const dots = document.querySelectorAll('.dot');
 
-    // Update Cards
+    // Check bounds for looping or clamping
+    // Here we clamp visual progress for text, but cards can be calculated freely if we wanted wrapping.
+    // For now, simpler clamping behavior matches previous logic.
+
     cards.forEach((card, index) => {
-        // Reset classes
-        card.className = 'card';
+        const diff = index - progress;
 
-        const diff = index - currentIndex;
+        // Optimization: don't render if far off screen
+        if (Math.abs(diff) > 3) {
+            card.style.display = 'none';
+            return;
+        }
 
-        if (diff === 0) {
+        card.style.display = 'flex';
+        const style = getInterpolatedStyle(diff);
+
+        card.style.zIndex = Math.round(100 - Math.abs(diff) * 10);
+        card.style.transform = `translateX(${style.x}%) scale(${style.scale}) translateZ(${style.z}px) rotateY(${style.rot}deg)`;
+        card.style.opacity = style.opacity;
+
+        // Active styling
+        if (Math.abs(diff) < 0.3) {
+            card.style.borderColor = 'var(--secondary)';
+            card.style.boxShadow = '0 20px 50px rgba(108, 92, 231, 0.4)';
             card.classList.add('active');
-        } else if (diff === -1) {
-            card.classList.add('prev-1');
-        } else if (diff === 1) {
-            card.classList.add('next-1');
-        } else if (diff === -2) {
-            card.classList.add('prev-2');
-        } else if (diff === 2) {
-            card.classList.add('next-2');
         } else {
-            // Handle looping somewhat or just hide distinct
-            // For simple 3D list, just hide others or pile them
-            // Let's make them hidden if too far
-            card.classList.add('hidden');
+            card.style.borderColor = 'rgba(255,255,255,0.1)';
+            card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
+            card.classList.remove('active');
         }
     });
 
-    // Update Dots
-    dots.forEach((dot, index) => {
-        dot.classList.toggle('active', index === currentIndex);
+    const activeIndex = Math.round(Math.max(0, Math.min(animeList.length - 1, progress)));
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === activeIndex);
     });
-
-    // Update Info with animation
-    infoPanel.style.opacity = 0;
-    setTimeout(() => {
-        titleEl.textContent = animeList[currentIndex].title;
-        yearEl.textContent = animeList[currentIndex].year;
-        infoPanel.style.opacity = 1;
-    }, 200);
 }
 
-// Keyboard navigation
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') {
-        if (currentIndex < animeList.length - 1) updateCarousel(currentIndex + 1);
-    } else if (e.key === 'ArrowLeft') {
-        if (currentIndex > 0) updateCarousel(currentIndex - 1);
-    }
-});
+function getInterpolatedStyle(diff) {
+    // We strictly use the checkpoints [-2, -1, 0, 1, 2]
+    // If diff is outside, clamp to nearest edge
+    if (diff <= -2) return checkpoints[0];
+    if (diff >= 2) return checkpoints[checkpoints.length - 1];
 
-// Drag / Swipe functionality
-let isDragging = false;
-let startPos = 0;
-let currentTranslate = 0;
-let prevTranslate = 0;
-let animationID;
+    // Find the segment diff belongs to
+    // Since our checkpoints are sorted by diff: -2, -1, 0, 1, 2
+    // We can just iterate.
+    let p1 = checkpoints[0];
+    let p2 = checkpoints[checkpoints.length - 1];
+
+    for (let i = 0; i < checkpoints.length - 1; i++) {
+        if (diff >= checkpoints[i].diff && diff <= checkpoints[i + 1].diff) {
+            p1 = checkpoints[i];
+            p2 = checkpoints[i + 1];
+            break;
+        }
+    }
+
+    const range = p2.diff - p1.diff;
+    const t = (diff - p1.diff) / range; // 0..1
+
+    return {
+        x: lerp(p1.x, p2.x, t),
+        scale: lerp(p1.scale, p2.scale, t),
+        z: lerp(p1.z, p2.z, t),
+        rot: lerp(p1.rot, p2.rot, t),
+        opacity: lerp(p1.opacity, p2.opacity, t)
+    };
+}
+
+function lerp(start, end, t) {
+    return start * (1 - t) + end * t;
+}
+
+function updateText(progress) {
+    const index = Math.round(Math.max(0, Math.min(animeList.length - 1, progress)));
+    const anime = animeList[index];
+
+    if (titleEl.textContent !== anime.title) {
+        // Simple swap without flicker
+        titleEl.textContent = anime.title;
+        yearEl.textContent = anime.year;
+
+        // Retrigger fade
+        infoPanel.style.animation = 'none';
+        infoPanel.offsetHeight; /* trigger reflow */
+        infoPanel.style.animation = 'fadeIn 0.5s forwards';
+    }
+}
+
+function animateLoop() {
+    // If not dragging, snap to target
+    if (!state.isDragging) {
+        // Smooth dampening
+        state.currentProgress += (state.targetProgress - state.currentProgress) * 0.1;
+
+        // Snap complete
+        if (Math.abs(state.targetProgress - state.currentProgress) < 0.001) {
+            state.currentProgress = state.targetProgress;
+        }
+    }
+
+    updateVisuals(state.currentProgress);
+    updateText(state.currentProgress);
+
+    requestAnimationFrame(animateLoop);
+}
+
+// Interactions
 const container = document.querySelector('.carousel-container');
 
-container.addEventListener('mousedown', touchStart);
-container.addEventListener('touchstart', touchStart);
+container.addEventListener('mousedown', dragStart);
+container.addEventListener('touchstart', dragStart);
 
-container.addEventListener('mouseup', touchEnd);
-container.addEventListener('mouseleave', touchEnd);
-container.addEventListener('touchend', touchEnd);
+window.addEventListener('mouseup', dragEnd);
+window.addEventListener('touchend', dragEnd);
 
-container.addEventListener('mousemove', touchMove);
-container.addEventListener('touchmove', touchMove);
+window.addEventListener('mousemove', dragMove);
+window.addEventListener('touchmove', dragMove);
 
-function touchStart(event) {
-    if (event.type.includes('mouse')) {
-        event.preventDefault();
-    }
+function getX(e) {
+    return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+}
 
-    isDragging = true;
-    startPos = getPositionX(event);
-    animationID = requestAnimationFrame(animation);
+function dragStart(e) {
+    if (e.type.includes('mouse')) e.preventDefault();
+    state.isDragging = true;
+    state.startX = getX(e);
+    state.startProgress = state.currentProgress;
     container.style.cursor = 'grabbing';
 }
 
-function touchEnd() {
-    isDragging = false;
-    cancelAnimationFrame(animationID);
+function dragMove(e) {
+    if (!state.isDragging) return;
+
+    const x = getX(e);
+    const delta = x - state.startX;
+
+    // Sensitivity: how many pixels = 1 card width movement?
+    // Move mouse Left (negative delta) -> Should increment Progress (camera moves right)
+    const sensitivity = 300;
+
+    // delta < 0 (left) => active index increases (next item)
+    state.currentProgress = state.startProgress - (delta / sensitivity);
+
+    // Elastic bounds
+    const min = -0.5;
+    const max = animeList.length - 0.5;
+
+    if (state.currentProgress < min) {
+        state.currentProgress = min + (state.currentProgress - min) * 0.2;
+    } else if (state.currentProgress > max) {
+        state.currentProgress = max + (state.currentProgress - max) * 0.2;
+    }
+}
+
+function dragEnd() {
+    if (!state.isDragging) return;
+    state.isDragging = false;
     container.style.cursor = 'grab';
 
-    const movedBy = currentTranslate - prevTranslate;
+    // Set snap target
+    state.targetProgress = Math.round(state.currentProgress);
 
-    // Threshold to change slide
-    if (movedBy < -50) {
-        if (currentIndex < animeList.length - 1) updateCarousel(currentIndex + 1);
-    } else if (movedBy > 50) {
-        if (currentIndex > 0) updateCarousel(currentIndex - 1);
+    // Clamp target
+    state.targetProgress = Math.max(0, Math.min(animeList.length - 1, state.targetProgress));
+}
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+        state.targetProgress = Math.min(animeList.length - 1, Math.round(state.targetProgress) + 1);
+    } else if (e.key === 'ArrowLeft') {
+        state.targetProgress = Math.max(0, Math.round(state.targetProgress) - 1);
     }
-
-    // Reset
-    currentTranslate = 0;
-    prevTranslate = 0;
-}
-
-function touchMove(event) {
-    if (isDragging) {
-        const currentPosition = getPositionX(event);
-        currentTranslate = prevTranslate + currentPosition - startPos;
-    }
-}
-
-function getPositionX(event) {
-    return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
-}
-
-function animation() {
-    if (isDragging) requestAnimationFrame(animation);
-}
-
-// Initial cursor
-container.style.cursor = 'grab';
+});
 
 init();
